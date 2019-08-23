@@ -74,6 +74,16 @@
 - name: Create install directory/genconf
   file: path={{ download_path }}/genconf state=directory mode=0755
 
+#  Copy license file when install dcos enterprise
+- name: Copy license file to /genconf directory when install dcos enterprise
+  copy:
+    src: "{{ license_file_location }}"
+    dest: "{{ download_path }}/genconf/license.txt"
+    owner: root
+    group: root
+    mode: '0444'
+  when: enterprise_dcos
+
 #  vvv DOWNLOAD vvv
 
 - name: Download installation file
@@ -99,10 +109,11 @@
     mode: 0644
   when: "dcos.config.ip_detect_public_contents is not defined"
   notify: trigger_new_config
-
+  
+#Habria que pensar como mejorar la logica de esta tarea
 - name: "Set default fault domain detection script for {{ dcos_environment }} (overwrite by setting `dcos.config.fault_domain_detect_contents`)"
   template:
-    src: "{{ dcos_environment }}/fault-domain-detect.sh.j2"
+    src: "fault-domain-detect-generic.sh.j2"
     dest: "{{ download_path }}/genconf/fault-domain-detect"
     mode: 0644
   when: "dcos.config.fault_domain_detect_contents is not defined"
