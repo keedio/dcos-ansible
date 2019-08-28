@@ -77,12 +77,13 @@
 #  Copy license file when install dcos enterprise
 - name: Copy license file to /genconf directory when install dcos enterprise
   copy:
-    src: "{{ license_file_location }}"
+    src: "{{ dcos.license_file_location }}"
     dest: "{{ download_path }}/genconf/license.txt"
     owner: root
     group: root
     mode: '0444'
-  when: enterprise_dcos
+    force: no
+  when: dcos.enterprise_dcos
 
 #  vvv DOWNLOAD vvv
 
