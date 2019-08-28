@@ -3,7 +3,7 @@ dcos:
   download: "https://downloads.mesosphere.com/dcos-enterprise/stable/1.13.3/dcos_generate_config.ee.sh"
   version: "1.13.3"
   enterprise_dcos: false
-  license_file_location: /Users/victorfernandez/Downloads/license_dcos_ee.txt
+  license_file_location: /Users/license_dcos_ee.txt
 
   selinux_mode: permissive
 
