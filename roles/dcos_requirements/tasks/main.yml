@@ -74,6 +74,13 @@
           Please make sure that the setup of chronyd is correct!
 
 - block:
+  - name: Start service ntpd and enable on boot
+    service:
+      name: ntpd
+      state: started
+      enabled: yes
+    when: "'ntpd.service' in ansible_facts.services and ('dcos-mesos-master.service' not in ansible_facts.services or 'dcos-mesos-slave.service' not in ansible_facts.services) and time_sync_package == 'ntp' and dcos_timesync"
+
   - name: Check time sync (ntp)
     shell: |
       ntpstat | grep -qv 'unsynchronised'
