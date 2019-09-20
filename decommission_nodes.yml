@@ -1,0 +1,13 @@
+---
+- name: Decommission Nodes
+  hosts: 127.0.0.1
+  connection: local
+  become: false
+  tasks:
+    - include_role:
+        name: dcos_decommission
+
+  vars:
+
+    nodes_to_decommission:
+      - 192.168.4.163
