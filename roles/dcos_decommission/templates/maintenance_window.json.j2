@@ -1,0 +1,18 @@
+{
+  "windows" : [
+    {
+      "machine_ids" : [
+        {% set comma = joiner(",") %}
+        {% for node in nodes_to_decommission %}
+
+        {{ comma() }}{ "hostname" : "{{ node }}", "ip" : "{{ node }}" }
+
+        {% endfor %}
+      ],
+      "unavailability" : {
+        "start" : { "nanoseconds" : {{ ansible_date_time.epoch }}000000000 },
+        "duration" : { "nanoseconds" : 3600000000000 }
+      }                            
+    }
+  ]
+}

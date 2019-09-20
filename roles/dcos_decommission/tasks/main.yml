@@ -1,0 +1,70 @@
+---
+- name: Obtain CA cert
+  uri:
+    url: "https://{{ master_host }}/ca/dcos-ca.crt"
+    method: GET
+    status_code: 200
+    validate_certs: no
+    return_content: yes
+  register: ca_cert
+
+- name: Create a CA cert file
+  copy:
+    content: "{{ ca_cert.content }}"
+    dest: "{{ cacert_destination_file }}"
+
+- name: Obtain a token to authenticate
+  shell: >
+    curl
+    -X POST -H 'Content-Type:application/json'
+    -d '{"uid":"{{ api_username }}","password":"{{ api_password }}"}'
+    https://{{ master_host }}/acs/api/v1/auth/login
+    --cacert {{ cacert_destination_file }}
+  args:
+    warn: False
+  register: token
+
+- set_fact:
+    token_resp: "{{ token.stdout|from_json }}"
+
+- name: Create maintenance window for nodes
+  shell: >
+    curl
+    -X POST -H 'Content-Type:application/json' -H 'Authorization:token={{ token_resp.token }}'
+    -d '{{ lookup('template', './maintenance_window.json.j2') |to_json }}'
+    https://{{ master_host }}:5050/master/maintenance/schedule
+    --cacert {{ cacert_destination_file }}
+  args:
+    warn: False
+  register: maintenance_resp
+
+- debug: var=maintenance_resp
+
+- name: Draining and down nodes 
+  shell: >
+    curl
+    -X POST -H 'Content-Type:application/json' -H 'Authorization:token={{ token_resp.token }}'
+    -d '{{ lookup('template', './draining_nodes.json.j2') |to_json }}'
+    https://{{ master_host }}:5050/master/machine/down
+    --cacert {{ cacert_destination_file }}
+  args:
+    warn: False
+  register: draining_resp
+
+- debug: var=draining_resp
+
+- name: Delete temporary CA Cert file
+  file:
+    path: "{{ cacert_destination_file }}"
+    state: absent
+
+    # - name: Obtain a token to authenticate
+    #   uri: 
+    #     url: "https://{{ master_host }}/acs/api/v1/auth/login"
+    #     method: POST
+    #     return_content: yes
+    #     body: "{\"uid\":\"{{ api_username }}\",\"password\":\"{{ api_password }}\"}"
+    #     validate_certs: no
+    #     body_format: json
+    #     status_code: 200
+    #   register: token
