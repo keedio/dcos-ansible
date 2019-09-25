@@ -1,7 +1,6 @@
 ---
 - name: Decommission Nodes
-  hosts: 127.0.0.1
-  connection: local
+  hosts: "{{ node_to_decommission }}"
   become: false
   tasks:
     - include_role:
@@ -9,5 +8,4 @@
 
   vars:
 
-    nodes_to_decommission:
-      - 192.168.4.163
+    node_to_decommission: 192.168.4.162

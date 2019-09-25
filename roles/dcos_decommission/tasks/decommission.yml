@@ -1,0 +1,61 @@
+---
+- name: Create maintenance window for node
+  shell: >
+    curl
+    -X POST -H 'Content-Type:application/json' -H 'Authorization:token={{ token_resp.token }}'
+    -d '{{ lookup('template', './maintenance_window.json.j2') |to_json }}'
+    https://{{ master_host }}:5050/master/maintenance/schedule
+    --cacert {{ cacert_destination_file }}
+  args:
+    warn: False
+  delegate_to: 127.0.0.1
+  register: maintenance_resp
+
+- name: Get Cluster Status
+  shell: >
+    curl
+    -X POST -H 'Content-Type:application/json' -H 'Authorization:token={{ token_resp.token }}'
+    -d '{"type": "GET_STATE"}'
+    https://{{ master_host }}:5050/api/v1
+    --cacert {{ cacert_destination_file }}
+  args:
+    warn: False
+  delegate_to: 127.0.0.1
+  register: cluster_state_resp
+
+- set_fact:
+    cluster_state: "{{ cluster_state_resp.stdout|from_json }}"
+
+#Extract the agent id from the cluster state json ,using a json_query filter
+- set_fact:
+    agentid: "{{ cluster_state | json_query(query) }}"
+  vars:
+    query: "get_state.get_agents.agents[?agent_info.hostname=='{{ node_to_decommission }}'].agent_info.id.value"
+
+- debug: var=agentid
+
+- name: Decommission node
+  shell: >
+    curl
+    -X POST -H 'Content-Type:application/json' -H 'Authorization:token={{ token_resp.token }}'
+    -d '{{ lookup('template', './decommission_node.json.j2') |to_json }}'
+    https://{{ master_host }}:5050/api/v1
+    --cacert {{ cacert_destination_file }}
+  args:
+    warn: False
+  delegate_to: 127.0.0.1
+  register: decommission_resp
+
+- debug: var=decommission_resp
+
+- name: Stop mesos slave process
+  become: yes
+  service:
+    name: dcos-mesos-slave*
+    state: stopped
+
+- name: Shutdown node
+  become: yes
+  shell: sleep 2 && /sbin/shutdown -c && /sbin/shutdown -h now
+  async: 1
+  poll: 0

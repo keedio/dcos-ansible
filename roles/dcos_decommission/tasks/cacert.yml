@@ -1,0 +1,16 @@
+---
+- name: Obtain CA cert
+  uri:
+    url: "https://{{ master_host }}/ca/dcos-ca.crt"
+    method: GET
+    status_code: 200
+    validate_certs: no
+    return_content: yes
+  delegate_to: 127.0.0.1
+  register: ca_cert
+
+- name: Create a CA cert file
+  copy:
+    content: "{{ ca_cert.content }}"
+    dest: "{{ cacert_destination_file }}"
+  delegate_to: 127.0.0.1
