@@ -1,8 +1,0 @@
-[
-  {% set comma = joiner(",") %}
-  {% for node in nodes_to_decommission %} 
-
-  {{ comma() }}{ "hostname" : "{{ node }}", "ip" : "{{ node }}" }
-
-  {% endfor %} 
-]
