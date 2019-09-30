@@ -1,5 +1,4 @@
 ---
 api_username: admin
 api_password: K33d10!
-master_host: 192.168.4.166
 cacert_destination_file: /tmp/dcos_cluster_cacert.crt
