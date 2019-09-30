@@ -2,7 +2,7 @@
   "windows" : [
     {
       "machine_ids" : [
-        { "hostname" : "{{ node_to_decommission }}", "ip" : "{{ node_to_decommission }}" }
+        { "hostname" : "{{ inventory_hostname }}", "ip" : "{{ inventory_hostname }}" }
       ],
       "unavailability" : {
         "start" : { "nanoseconds" : {{ ansible_date_time.epoch }}000000000 },
