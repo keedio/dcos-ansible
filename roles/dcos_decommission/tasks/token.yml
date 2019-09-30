@@ -4,11 +4,10 @@
     curl
     -X POST -H 'Content-Type:application/json'
     -d '{"uid":"{{ api_username }}","password":"{{ api_password }}"}'
-    https://{{ master_host }}/acs/api/v1/auth/login
+    https://{{ groups['masters'][0] }}/acs/api/v1/auth/login
     --cacert {{ cacert_destination_file }}
   args:
     warn: False
-  delegate_to: 127.0.0.1
   register: token
 
 - set_fact:
