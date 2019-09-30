@@ -1,0 +1,19 @@
+---
+- name: Check if node runs in the cluster
+  uri:
+    url: "https://{{ inventory_hostname }}:5051/api/v1"
+    method: POST
+    body: {"type": "GET_STATE"}
+    headers:
+      Content-Type: application/json
+      Authorization: token={{ token_resp.token }}
+    force_basic_auth: yes
+    status_code: 200,-1
+    body_format: json
+    validate_certs: no
+  register: check_node_exist
+
+- pause:
+    prompt: "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nBE CAREFUL,THE NODE DOESN´T SEEM TO EXIST IN THE CLUSTER OR TO BE SHUTDOWN\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    seconds: 10
+  when: check_node_exist.status != 200
