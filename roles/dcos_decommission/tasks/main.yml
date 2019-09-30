@@ -1,9 +1,16 @@
 ---
-- name: Obtain CA cert 
-  include_tasks: cacert.yml
+- pause:
+    prompt: "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nYOU CAN ONLY DECOMMISSION ONE HOST AT A TIME, CHECK THE INVENTORY\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  when: ansible_play_hosts | length > 1
 
-- name: Obtain a token to authenticate
-  include_tasks: token.yml
+- meta: end_play
+  when: ansible_play_hosts | length > 1
 
-- name: Decommission tasks
-  include_tasks: decommission.yml
+- include_tasks: cacert.yml
+
+- include_tasks: token.yml
+
+- include_tasks: check_node_exist.yml
+
+- include_tasks: decommission.yml
+  when: check_node_exist.status == 200
