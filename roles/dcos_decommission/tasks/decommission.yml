@@ -4,11 +4,8 @@
     curl
     -X POST -H 'Content-Type:application/json' -H 'Authorization:token={{ token_resp.token }}'
     -d '{{ lookup('template', './maintenance_window.json.j2') |to_json }}'
-    https://{{ master_host }}:5050/master/maintenance/schedule
+    https://{{ groups['masters'][0] }}:5050/master/maintenance/schedule
     --cacert {{ cacert_destination_file }}
-  args:
-    warn: False
-  delegate_to: 127.0.0.1
   register: maintenance_resp
 
 - name: Get Cluster Status
@@ -16,11 +13,10 @@
     curl
     -X POST -H 'Content-Type:application/json' -H 'Authorization:token={{ token_resp.token }}'
     -d '{"type": "GET_STATE"}'
-    https://{{ master_host }}:5050/api/v1
+    https://{{ groups['masters'][0] }}:5050/api/v1
     --cacert {{ cacert_destination_file }}
   args:
     warn: False
-  delegate_to: 127.0.0.1
   register: cluster_state_resp
 
 - set_fact:
@@ -30,7 +26,7 @@
 - set_fact:
     agentid: "{{ cluster_state | json_query(query) }}"
   vars:
-    query: "get_state.get_agents.agents[?agent_info.hostname=='{{ node_to_decommission }}'].agent_info.id.value"
+    query: "get_state.get_agents.agents[?agent_info.hostname=='{{ inventory_hostname }}'].agent_info.id.value"
 
 - debug: var=agentid
 
@@ -39,11 +35,10 @@
     curl
     -X POST -H 'Content-Type:application/json' -H 'Authorization:token={{ token_resp.token }}'
     -d '{{ lookup('template', './decommission_node.json.j2') |to_json }}'
-    https://{{ master_host }}:5050/api/v1
+    https://{{ groups['masters'][0] }}:5050/api/v1
     --cacert {{ cacert_destination_file }}
   args:
     warn: False
-  delegate_to: 127.0.0.1
   register: decommission_resp
 
 - debug: var=decommission_resp
@@ -53,9 +48,11 @@
   service:
     name: dcos-mesos-slave*
     state: stopped
+  delegate_to: "{{ inventory_hostname }}"
 
 - name: Shutdown node
   become: yes
   shell: sleep 2 && /sbin/shutdown -c && /sbin/shutdown -h now
   async: 1
   poll: 0
+  delegate_to: "{{ inventory_hostname }}"
