@@ -1,5 +1,5 @@
 ---
-- name: Decommission Nodes
+- name: Decommission Node
   hosts: decommission_node
   connection: local
   become: false
