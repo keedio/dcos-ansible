@@ -1,4 +1,2 @@
 ---
-api_username: admin
-api_password: K33d10!
 cacert_destination_file: /tmp/dcos_cluster_cacert.crt
