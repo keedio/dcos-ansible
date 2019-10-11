@@ -3,7 +3,7 @@
   shell: >
     curl
     -X POST -H 'Content-Type:application/json'
-    -d '{"uid":"{{ api_username }}","password":"{{ api_password }}"}'
+    -d '{"uid":"{{ superuser_username }}","password":"{{ superuser_password_hash }}"}'
     https://{{ groups['masters'][0] }}/acs/api/v1/auth/login
     --cacert {{ cacert_destination_file }}
   args:
