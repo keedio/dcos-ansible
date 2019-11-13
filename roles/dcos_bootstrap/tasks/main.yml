@@ -111,7 +111,6 @@
   when: "dcos.config.ip_detect_public_contents is not defined"
   notify: trigger_new_config
   
-#Habria que pensar como mejorar la logica de esta tarea
 - name: "Set default fault domain detection script for {{ dcos_environment }} (overwrite by setting `dcos.config.fault_domain_detect_contents`)"
   template:
     src: "fault-domain-detect-generic.sh.j2"
